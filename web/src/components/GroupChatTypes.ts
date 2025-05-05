@@ -2,15 +2,14 @@ import { Message } from "./ChatInterfaceComponent";
 
 // Mở rộng interface Message để hỗ trợ tính năng group chat
 export interface GroupMessage extends Message {
-  groupId?: string; // ID của nhóm chat
-  chatType?: "private" | "group"; // Loại chat (riêng tư hoặc nhóm)
-  isUnsent?: boolean; // Trạng thái tin nhắn đã bị thu hồi (alias cho unsent)
+  groupId?: string;
+  chatType?: "private" | "group";
+  isUnsent?: boolean;
 }
 
 // Định nghĩa vai trò thành viên trong nhóm
 export type Role = "admin" | "coAdmin" | "member";
 
-// Định nghĩa kiểu thành viên nhóm
 export interface GroupMember {
   _id: string;
   name: string;

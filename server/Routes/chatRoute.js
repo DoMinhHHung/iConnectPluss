@@ -69,8 +69,6 @@ router.post("/test-cloudinary-upload", chatController.uploadToCloudinary);
 router.get("/media/:fileId", chatController.getMedia);
 router.delete("/media/:fileId", authMiddleware, chatController.deleteMedia);
 
-router.get("/preview/:fileId", chatController.previewDocument);
-
 // Route để lấy tin nhắn giữa 2 người dùng - đặt trước route chung
 router.get(
   "/messages/:userId1/:userId2",

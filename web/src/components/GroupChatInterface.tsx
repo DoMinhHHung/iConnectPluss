@@ -51,6 +51,8 @@ import {
   MessageSender,
 } from "./GroupChatTypes";
 
+import CoAdminDialog from "./CoAdminDialog";
+
 const GroupChatInterface: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const { user } = useAppSelector((state) => state.auth);
@@ -120,6 +122,12 @@ const GroupChatInterface: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const [selectedCoAdminAction, setSelectedCoAdminAction] = useState<
+    "add" | "remove"
+  >("add");
+  const [coAdminSearchResults, setCoAdminSearchResults] = useState<any[]>([]);
+  const [coAdminSearchTerm, setCoAdminSearchTerm] = useState("");
 
   const dispatch = useAppDispatch();
 
@@ -1164,7 +1172,11 @@ const GroupChatInterface: React.FC = () => {
     }
   };
 
-  // Phần còn lại của các hàm và JSX
+  // Handle co-admin management
+  const handleManageCoAdmins = () => {
+    setShowManageCoAdminDialog(true);
+    setShowGroupOptions(false); // Close group options menu
+  };
 
   if (loading) {
     return <div className="chat-loading">Loading group chat...</div>;
@@ -1182,7 +1194,690 @@ const GroupChatInterface: React.FC = () => {
 
   return (
     <div className="group-chat-interface">
-      <div className="chat-header"></div>
+      <div className="chat-header">
+        <div className="group-info">
+          <div className="group-avatar">
+            {group.avatarUrl ? (
+              <img src={group.avatarUrl} alt={group.name} />
+            ) : (
+              <div className="avatar-placeholder">
+                {group.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="group-details">
+            <h2 className="group-name">{group.name}</h2>
+            <div className="group-members-count">
+              {group.members.length} members
+              {group.members.length > 0 && (
+                <span className="online-members">
+                  •{" "}
+                  {
+                    Array.from(onlineUsers).filter((id) =>
+                      group.members.some((member) =>
+                        typeof member === "object"
+                          ? member._id === id
+                          : member === id
+                      )
+                    ).length
+                  }{" "}
+                  online
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="header-actions">
+          <button
+            className="action-button search-button"
+            onClick={() => setShowSearchDialog(true)}
+            title="Search messages"
+          >
+            <FiSearch />
+          </button>
+
+          <button
+            className="action-button members-button"
+            onClick={() => setShowMembersList(true)}
+            title="Group members"
+          >
+            <FiUsers />
+          </button>
+
+          <div className="dropdown">
+            <button
+              className="action-button more-button"
+              onClick={() => setShowMoreOptions(!showMoreOptions)}
+              title="More options"
+            >
+              <FiMoreVertical />
+            </button>
+
+            {showMoreOptions && (
+              <div className="dropdown-menu">
+                <button onClick={() => {
+                  setShowSearchDialog(true);
+                  setShowMoreOptions(false);
+                }}>
+                  <FiSearch /> Search Messages
+                </button>
+                <button onClick={() => {
+                  setShowMediaGallery(true);
+                  setShowMoreOptions(false);
+                }}>
+                  <FiFileText /> Media Gallery
+                </button>
+                {(userRole === "admin" || userRole === "coAdmin") && (
+                  <>
+                    <button onClick={handleEditGroupName}>
+                      <FiSettings /> Edit Group Name
+                    </button>
+                    <button onClick={() => setShowEditAvatarDialog(true)}>
+                      <FiImage /> Change Group Avatar
+                    </button>
+                    <button onClick={() => setShowAddMemberDialog(true)}>
+                      <FiUserPlus /> Add Members
+                    </button>
+                    <button onClick={() => setShowRemoveMemberDialog(true)}>
+                      <FiUserX /> Remove Members
+                    </button>
+                    {userRole === "admin" && (
+                      <button onClick={handleManageCoAdmins}>
+                        <FiUserCheck /> Manage Co-admins
+                      </button>
+                    )}
+                    <div className="dropdown-divider"></div>
+                  </>
+                )}
+                <button onClick={handleLeaveGroup} className="danger-option">
+                  <FiArchive /> Leave Group
+                </button>
+                {userRole === "admin" && (
+                  <button onClick={handleDeleteGroup} className="danger-option">
+                    <FiTrash2 /> Delete Group
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Members list dialog */}
+      {showMembersList && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowMembersList(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Group Members ({group.members.length})</h3>
+              <button
+                className="close-button"
+                onClick={() => setShowMembersList(false)}
+              >
+                <FiX />
+              </button>
+            </div>
+            <div className="members-list">
+              {group.members.map((member) => {
+                const memberId =
+                  typeof member === "object" ? member._id : member;
+                const memberName =
+                  typeof member === "object" ? member.name : "Unknown";
+                const memberAvt =
+                  typeof member === "object" ? member.avt : null;
+                const isAdmin =
+                  typeof group.admin === "object"
+                    ? group.admin._id === memberId
+                    : group.admin === memberId;
+                const isCoAdmin =
+                  Array.isArray(group.coAdmins) &&
+                  group.coAdmins.includes(memberId);
+                const isOnline = onlineUsers.has(memberId);
+
+                // Kiểm tra người dùng hiện tại có quyền xóa thành viên này không
+                const canRemoveMember =
+                  // Admin có thể xóa mọi người trừ chính họ
+                  (userRole === "admin" && memberId !== user?._id) ||
+                  // Co-Admin có thể xóa thành viên thường
+                  (userRole === "coAdmin" &&
+                    !isAdmin &&
+                    !isCoAdmin &&
+                    memberId !== user?._id);
+
+                return (
+                  <div key={memberId} className="member-item">
+                    <div className="member-avatar">
+                      {memberAvt ? (
+                        <img src={memberAvt} alt={memberName} />
+                      ) : (
+                        <div className="avatar-placeholder">
+                          {memberName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      {isOnline && <div className="online-indicator"></div>}
+                    </div>
+                    <div className="member-info">
+                      <div className="member-name">
+                        {memberName}
+                        {memberId === user?._id && " (You)"}
+                        {isAdmin && (
+                          <span className="role-badge admin">Admin</span>
+                        )}
+                        {isCoAdmin && (
+                          <span className="role-badge co-admin">Co-Admin</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Hiển thị nút xóa thành viên dựa trên phân quyền */}
+                    {canRemoveMember && (
+                      <button
+                        className="remove-button"
+                        onClick={async () => {
+                          // Xác nhận xóa thành viên
+                          const confirmed = await showConfirmDialog(
+                            `Bạn có chắc chắn muốn xóa ${memberName} khỏi nhóm?`
+                          );
+
+                          if (!confirmed) return;
+
+                          try {
+                            const token = localStorage.getItem("token");
+                            await axios.post(
+                              `http://localhost:3005/api/groups/remove-member`,
+                              {
+                                groupId,
+                                memberId,
+                              },
+                              {
+                                headers: { Authorization: `Bearer ${token}` },
+                              }
+                            );
+
+                            // Thông báo qua socket
+                            if (socket) {
+                              socket.emit("memberRemovedFromGroup", {
+                                groupId,
+                                memberId,
+                                removedBy: user?._id,
+                              });
+                            }
+
+                            // Cập nhật thông tin nhóm
+                            fetchGroupInfo();
+
+                            // Thông báo thành công
+                            alert(`Đã xóa ${memberName} khỏi nhóm`);
+                          } catch (error) {
+                            console.error("Error removing member:", error);
+                            alert(
+                              "Không thể xóa thành viên. Vui lòng thử lại sau."
+                            );
+                          }
+                        }}
+                      >
+                        <FiUserX /> Xóa
+                      </button>
+                    )}
+
+                    {/* Hiển thị nút thăng cấp phó nhóm cho admin */}
+                    {userRole === "admin" && !isAdmin && !isCoAdmin && (
+                      <button
+                        className="promote-button"
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem("token");
+                            await axios.post(
+                              `http://localhost:3005/api/groups/add-co-admin`,
+                              {
+                                groupId,
+                                userId: memberId,
+                              },
+                              {
+                                headers: { Authorization: `Bearer ${token}` },
+                              }
+                            );
+
+                            // Thông báo qua socket
+                            if (socket) {
+                              socket.emit("addCoAdmin", {
+                                groupId,
+                                userId: memberId,
+                                addedBy: user?._id,
+                              });
+                            }
+
+                            // Cập nhật thông tin nhóm
+                            fetchGroupInfo();
+
+                            // Thông báo thành công
+                            alert(`Đã thăng cấp ${memberName} làm phó nhóm`);
+                          } catch (error) {
+                            console.error("Error adding co-admin:", error);
+                          }
+                        }}
+                      >
+                        <FiUserCheck /> Thăng cấp
+                      </button>
+                    )}
+
+                    {/* Hiển thị nút hạ cấp phó nhóm cho admin */}
+                    {userRole === "admin" && isCoAdmin && (
+                      <button
+                        className="demote-button"
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem("token");
+                            await axios.post(
+                              `http://localhost:3005/api/groups/remove-co-admin`,
+                              {
+                                groupId,
+                                userId: memberId,
+                              },
+                              {
+                                headers: { Authorization: `Bearer ${token}` },
+                              }
+                            );
+
+                            // Thông báo qua socket
+                            if (socket) {
+                              socket.emit("removeCoAdmin", {
+                                groupId,
+                                userId: memberId,
+                                removedBy: user?._id,
+                              });
+                            }
+
+                            // Cập nhật thông tin nhóm
+                            fetchGroupInfo();
+
+                            // Thông báo thành công
+                            alert(
+                              `Đã hạ cấp ${memberName} xuống thành viên thường`
+                            );
+                          } catch (error) {
+                            console.error("Error removing co-admin:", error);
+                          }
+                        }}
+                      >
+                        <FiUserX /> Hạ cấp
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add member dialog */}
+      {showAddMemberDialog && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowAddMemberDialog(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Add Members</h3>
+              <button
+                className="close-button"
+                onClick={() => setShowAddMemberDialog(false)}
+              >
+                <FiX />
+              </button>
+            </div>
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={newMemberSearch}
+                onChange={(e) => setNewMemberSearch(e.target.value)}
+              />
+              <button
+                className="search-button"
+                onClick={() => {
+                  // Implement search users functionality
+                  const searchUsers = async () => {
+                    try {
+                      const token = localStorage.getItem("token");
+                      const response = await axios.get(
+                        `http://localhost:3005/api/search/users?query=${newMemberSearch}`,
+                        {
+                          headers: { Authorization: `Bearer ${token}` },
+                        }
+                      );
+                      // Filter out users who are already members
+                      const filteredResults = response.data.filter(
+                        (user: any) =>
+                          !group.members.some((member) =>
+                            typeof member === "object"
+                              ? member._id === user._id
+                              : member === user._id
+                          )
+                      );
+                      setSearchResults(filteredResults);
+                    } catch (error) {
+                      console.error("Error searching users:", error);
+                    }
+                  };
+
+                  if (newMemberSearch.trim()) {
+                    searchUsers();
+                  }
+                }}
+              >
+                Search
+              </button>
+            </div>
+            <div className="search-results">
+              {searchResults.map((user) => (
+                <div key={user._id} className="user-item">
+                  <div className="user-avatar">
+                    {user.avt ? (
+                      <img src={user.avt} alt={user.name} />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="user-info">
+                    <div className="user-name">{user.name}</div>
+                    <div className="user-email">{user.email}</div>
+                  </div>
+                  <button
+                    className="add-button"
+                    onClick={async () => {
+                      try {
+                        const token = localStorage.getItem("token");
+                        await axios.post(
+                          `http://localhost:3005/api/groups/add-member`,
+                          {
+                            groupId,
+                            memberId: user._id,
+                          },
+                          {
+                            headers: { Authorization: `Bearer ${token}` },
+                          }
+                        );
+
+                        // Emit socket event
+                        if (socket) {
+                          socket.emit("addMemberToGroup", {
+                            groupId,
+                            memberId: user._id,
+                            addedBy: user?._id,
+                          });
+                        }
+
+                        // Refresh group info
+                        fetchGroupInfo();
+                        setShowAddMemberDialog(false);
+                      } catch (error) {
+                        console.error("Error adding member:", error);
+                      }
+                    }}
+                  >
+                    Add
+                  </button>
+                </div>
+              ))}
+              {searchResults.length === 0 && newMemberSearch && (
+                <div className="no-results">No users found</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete options dialog */}
+      {showDeleteOptionsDialog && selectedMessageForDelete && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteOptionsDialog(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Message</h3>
+              <button
+                className="close-button"
+                onClick={() => setShowDeleteOptionsDialog(false)}
+              >
+                <FiX />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>How do you want to delete this message?</p>
+              <div className="delete-options">
+                <button className="delete-option" onClick={deleteMessageForMe}>
+                  Delete for me only
+                </button>
+                <button
+                  className="delete-option delete-for-everyone"
+                  onClick={deleteMessageForEveryone}
+                >
+                  Delete for everyone
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit group name dialog */}
+      {showEditNameDialog && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowEditNameDialog(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit Group Name</h3>
+              <button
+                className="close-button"
+                onClick={() => setShowEditNameDialog(false)}
+              >
+                <FiX />
+              </button>
+            </div>
+            <div className="edit-name-form">
+              <input
+                type="text"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                placeholder="Enter new group name"
+              />
+              <div className="button-group">
+                <button
+                  className="cancel-button"
+                  onClick={() => setShowEditNameDialog(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="save-button"
+                  onClick={async () => {
+                    if (!newGroupName.trim()) return;
+
+                    try {
+                      const token = localStorage.getItem("token");
+                      await axios.put(
+                        `http://localhost:3005/api/groups/${groupId}`,
+                        {
+                          name: newGroupName,
+                        },
+                        {
+                          headers: { Authorization: `Bearer ${token}` },
+                        }
+                      );
+
+                      // Update local state
+                      setGroup((prev) =>
+                        prev ? { ...prev, name: newGroupName } : null
+                      );
+                      setShowEditNameDialog(false);
+
+                      // Notify other members
+                      if (socket) {
+                        socket.emit("groupUpdated", {
+                          groupId,
+                          updatedBy: user?._id,
+                        });
+                      }
+                    } catch (error) {
+                      console.error("Error updating group name:", error);
+                    }
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manage co-admin dialog */}
+      {showManageCoAdminDialog && group && user && socket && (
+        <CoAdminDialog
+          isOpen={showManageCoAdminDialog}
+          groupId={groupId || ""}
+          group={group}
+          userId={user._id}
+          onClose={() => setShowManageCoAdminDialog(false)}
+          onCoAdminUpdated={fetchGroupInfo}
+          socket={socket}
+        />
+      )}
+
+      {/* Remove member dialog */}
+      {showRemoveMemberDialog && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowRemoveMemberDialog(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Remove Members</h3>
+              <button
+                className="close-button"
+                onClick={() => setShowRemoveMemberDialog(false)}
+              >
+                <FiX />
+              </button>
+            </div>
+            <div className="remove-member-section">
+              <p className="info-text">
+                Select members to remove from the group
+              </p>
+              <div className="members-list">
+                {group.members
+                  .filter((member) => {
+                    // Lọc ra những người có thể bị xóa dựa trên quyền hạn của người dùng hiện tại
+                    const memberId =
+                      typeof member === "object" ? member._id : member;
+
+                    // Nếu là Admin, có thể xóa tất cả ngoại trừ chính mình
+                    if (userRole === "admin") {
+                      return memberId !== user?._id;
+                    }
+
+                    // Nếu là Co-Admin, không thể xóa admin hoặc co-admin khác
+                    const isAdmin =
+                      typeof group.admin === "object"
+                        ? group.admin._id === memberId
+                        : group.admin === memberId;
+                    const isCoAdmin =
+                      Array.isArray(group.coAdmins) &&
+                      group.coAdmins.includes(memberId);
+
+                    return !isAdmin && !isCoAdmin && memberId !== user?._id;
+                  })
+                  .map((member) => {
+                    const memberId =
+                      typeof member === "object" ? member._id : member;
+                    const memberName =
+                      typeof member === "object" ? member.name : "Unknown";
+                    const memberAvt =
+                      typeof member === "object" ? member.avt : null;
+                    const isOnline = onlineUsers.has(memberId);
+
+                    return (
+                      <div key={memberId} className="member-item">
+                        <div className="member-avatar">
+                          {memberAvt ? (
+                            <img src={memberAvt} alt={memberName} />
+                          ) : (
+                            <div className="avatar-placeholder">
+                              {memberName.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          {isOnline && <div className="online-indicator"></div>}
+                        </div>
+                        <div className="member-info">
+                          <div className="member-name">{memberName}</div>
+                        </div>
+                        <button
+                          className="remove-button"
+                          onClick={async () => {
+                            try {
+                              const token = localStorage.getItem("token");
+                              await axios.post(
+                                `http://localhost:3005/api/groups/remove-member`,
+                                {
+                                  groupId,
+                                  memberId,
+                                },
+                                {
+                                  headers: { Authorization: `Bearer ${token}` },
+                                }
+                              );
+
+                              // Thông báo qua socket
+                              if (socket) {
+                                socket.emit("memberRemovedFromGroup", {
+                                  groupId,
+                                  memberId,
+                                  removedBy: user?._id,
+                                });
+                              }
+
+                              // Cập nhật thông tin nhóm
+                              fetchGroupInfo();
+
+                              // Thông báo thành công
+                              alert(`Đã xóa ${memberName} khỏi nhóm`);
+                            } catch (error) {
+                              console.error("Error removing member:", error);
+                              alert(
+                                "Không thể xóa thành viên. Vui lòng thử lại sau."
+                              );
+                            }
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
+              <div className="button-group">
+                <button
+                  className="cancel-button"
+                  onClick={() => setShowRemoveMemberDialog(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="chat-messages">
         {renderMessages()}
         {typingMembers.length > 0 && (
@@ -1198,18 +1893,99 @@ const GroupChatInterface: React.FC = () => {
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {isReplying && replyToMessage && (
+        <ReplyBar
+          replyToMessage={replyToMessage}
+          friend={null}
+          user={user}
+          cancelReply={cancelReply}
+        />
+      )}
+
       <form className="message-form" onSubmit={handleSendMessage}>
-        {/* Form content */}
+        <div className="form-actions">
+          <div className="attach-menu-container">
+            <button
+              type="button"
+              className="attach-button"
+              onClick={toggleAttachMenu}
+            >
+              <FiPaperclip />
+            </button>
+
+            {showAttachMenu && (
+              <div className="attach-menu">
+                <button
+                  type="button"
+                  onClick={() => handleFileTypeSelect("image")}
+                  className="attach-option"
+                >
+                  <FiImage /> Image
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleFileTypeSelect("video")}
+                  className="attach-option"
+                >
+                  <FiVideo /> Video
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleFileTypeSelect("audio")}
+                  className="attach-option"
+                >
+                  <FiMusic /> Audio
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleFileTypeSelect("file")}
+                  className="attach-option"
+                >
+                  <FiFileText /> Document
+                </button>
+              </div>
+            )}
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileUpload}
+            />
+          </div>
+        </div>
+
         <input
           type="text"
           placeholder={isReplying ? "Type your reply..." : "Type a message..."}
           value={newMessage}
           onChange={handleTyping}
         />
+
         <button type="submit" disabled={!newMessage.trim() && !isUploading}>
           <FiSend />
         </button>
       </form>
+
+      {/* Media preview overlay */}
+      <MediaPreview
+        mediaPreview={mediaPreview}
+        closeMediaPreview={() => setMediaPreview(null)}
+      />
+
+      {isUploading && (
+        <div className="upload-overlay">
+          <div className="upload-progress">
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <div className="progress-text">{uploadProgress}%</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

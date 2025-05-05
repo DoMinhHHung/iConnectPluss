@@ -1,12 +1,27 @@
 const Group = require("../Models/groupModel");
 const User = require("../Models/userModel");
 const Message = require("../Models/messageModels");
+const cloudinary = require("../config/cloudinaryConfig");
 
 const createGroup = async (req, res) => {
   const { name, members, description } = req.body;
   const admin = req.user._id;
+  let avatarUrl = null;
 
   try {
+    // Xử lý tải lên ảnh nhóm nếu có
+    if (req.files && req.files.avatar) {
+      const uploadResult = await cloudinary.uploader.upload(
+        req.files.avatar.tempFilePath,
+        {
+          folder: "group_avatars",
+          width: 150,
+          crop: "scale",
+        }
+      );
+      avatarUrl = uploadResult.secure_url;
+    }
+
     if (!members.includes(admin.toString())) {
       members.push(admin);
     }
@@ -16,6 +31,7 @@ const createGroup = async (req, res) => {
       members,
       admin,
       description,
+      avatarUrl, // Lưu URL avatar vào model
       coAdmins: [],
     });
 

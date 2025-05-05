@@ -1,5 +1,7 @@
 import React from "react";
 import { FiVideo, FiFileText, FiX } from "../components/IconComponents";
+import ConfirmDialog from "./ConfirmDialog";
+import ReactDOM from "react-dom";
 
 // Interfaces
 export interface Message {
@@ -242,50 +244,6 @@ export const renderMessageContent = (
 
 // Components
 export const FileInfo: React.FC<{ message: Message }> = ({ message }) => {
-  // Thêm state để theo dõi trạng thái xem trước
-  const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
-
-  // Kiểm tra xem file có thể xem trước được không (docx, pdf, text files)
-  const isPreviewable = React.useMemo(() => {
-    if (!message.fileName) return false;
-    const ext = message.fileName.split(".").pop()?.toLowerCase();
-    return [
-      "pdf",
-      "docx",
-      "doc",
-      "txt",
-      "json",
-      "md",
-      "js",
-      "html",
-      "css",
-      "xml",
-    ].includes(ext || "");
-  }, [message.fileName]);
-
-  // Tạo URL xem trước
-  const previewUrl = React.useMemo(() => {
-    if (!message.fileId) return "";
-    // Lấy URL từ server
-    return `${window.location.protocol}//${window.location.host}/api/chat/preview/${message.fileId}`;
-  }, [message.fileId]);
-
-  // Mở xem trước trong iframe hoặc tab mới
-  const handlePreview = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isPreviewOpen) {
-      setIsPreviewOpen(false);
-    } else {
-      setIsPreviewOpen(true);
-    }
-  };
-
-  // Xem trước trong tab mới
-  const openInNewTab = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.open(previewUrl, "_blank");
-  };
-
   if (message.fileId && message.expiryDate) {
     const expiryDate = new Date(message.expiryDate);
     const now = new Date();
@@ -299,32 +257,8 @@ export const FileInfo: React.FC<{ message: Message }> = ({ message }) => {
     );
 
     return (
-      <div className="file-info-container">
-        <div className="file-expiry-info">
-          File này sẽ hết hạn trong {daysLeft} ngày
-        </div>
-
-        {isPreviewable && (
-          <div className="file-preview-actions">
-            <button className="preview-button" onClick={handlePreview}>
-              {isPreviewOpen ? "Đóng xem trước" : "Xem trước"}
-            </button>
-            <button className="open-new-tab" onClick={openInNewTab}>
-              Mở trong tab mới
-            </button>
-          </div>
-        )}
-
-        {isPreviewable && isPreviewOpen && (
-          <div className="file-preview-container">
-            <iframe
-              src={previewUrl}
-              title="Document Preview"
-              className="file-preview-iframe"
-              sandbox="allow-scripts"
-            ></iframe>
-          </div>
-        )}
+      <div className="file-expiry-info">
+        File này sẽ hết hạn trong {daysLeft} ngày
       </div>
     );
   }
@@ -411,10 +345,35 @@ export const isMessageFromCurrentUser = (message: Message, userId?: string) => {
   );
 };
 
-// Hàm hiển thị thông báo xác nhận an toàn hơn replace cho window.confirm
+// Hàm hiển thị thông báo xác nhận tùy chỉnh thay thế cho window.confirm
 export const showConfirmDialog = (message: string): Promise<boolean> => {
   return new Promise((resolve) => {
-    const result = window.confirm(message);
-    resolve(result);
+    // Create a div to mount our dialog into
+    const dialogRoot = document.createElement("div");
+    dialogRoot.id = "confirm-dialog-root";
+    document.body.appendChild(dialogRoot);
+
+    // Function to clean up the dialog after it's closed
+    const cleanupDialog = () => {
+      ReactDOM.unmountComponentAtNode(dialogRoot);
+      document.body.removeChild(dialogRoot);
+    };
+
+    // Render our custom dialog component
+    ReactDOM.render(
+      <ConfirmDialog
+        message={message}
+        isOpen={true}
+        onConfirm={() => {
+          resolve(true);
+          cleanupDialog();
+        }}
+        onCancel={() => {
+          resolve(false);
+          cleanupDialog();
+        }}
+      />,
+      dialogRoot
+    );
   });
 };
