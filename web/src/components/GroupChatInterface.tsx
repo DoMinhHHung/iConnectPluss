@@ -129,23 +129,20 @@ const GroupChatInterface: React.FC = () => {
   const [coAdminSearchResults, setCoAdminSearchResults] = useState<any[]>([]);
   const [coAdminSearchTerm, setCoAdminSearchTerm] = useState("");
 
+  // Thêm state cho dialog chuyển quyền admin
+  const [showTransferAdminDialog, setShowTransferAdminDialog] = useState(false);
+  const [transferToUserId, setTransferToUserId] = useState<string | null>(null);
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (group && user) {
-      // Chuyển đổi string ID sang string để so sánh chính xác
       const adminId =
         typeof group.admin === "object" && group.admin !== null
           ? group.admin._id
           : group.admin;
 
       const userId = user._id;
-
-      console.log("Admin check:", {
-        adminId,
-        userId,
-        isAdmin: adminId === userId,
-      });
 
       if (adminId === userId) {
         setUserRole("admin");
@@ -157,20 +154,10 @@ const GroupChatInterface: React.FC = () => {
       } else {
         setUserRole("member");
       }
-
-      console.log(
-        "User role set to:",
-        adminId === userId
-          ? "admin"
-          : Array.isArray(group.coAdmins) && group.coAdmins.includes(userId)
-          ? "coAdmin"
-          : "member"
-      );
     }
   }, [group, user]);
 
   useEffect(() => {
-    // Reset counter tin nhắn nhóm khi vào trang chat nhóm
     dispatch(resetUnreadGroupMessages());
   }, [dispatch]);
 
@@ -276,8 +263,6 @@ const GroupChatInterface: React.FC = () => {
     });
 
     newSocket.on("groupMessage", (data: any) => {
-      console.log("Nhận tin nhắn nhóm:", data);
-
       const newMessage: GroupMessage = {
         _id: data._id,
         sender: data.sender,
@@ -304,30 +289,23 @@ const GroupChatInterface: React.FC = () => {
         ...(data.expiryDate ? { expiryDate: data.expiryDate } : {}),
       };
 
-      // Kiểm tra tin nhắn đến từ user hiện tại không
       const isFromCurrentUser =
         typeof data.sender === "string"
           ? data.sender === user?._id
           : data.sender._id === user?._id;
 
-      // Kiểm tra có đang trong nhóm chat này không
       const isCurrentGroup = data.groupId === groupId;
 
       if (isFromCurrentUser) {
-        // Chỉ thêm vào danh sách tin nhắn nếu từ user hiện tại
         setMessages((prev) => [...prev, newMessage]);
       } else {
-        // Thêm tin nhắn vào danh sách nếu đang trong nhóm chat này
         if (isCurrentGroup) {
           setMessages((prev) => [...prev, newMessage]);
         } else {
-          // Nếu không phải nhóm chat hiện tại, tăng số tin nhắn nhóm chưa đọc
-          console.log("Tăng số tin nhắn nhóm chưa đọc");
           dispatch(incrementUnreadGroupMessages());
         }
       }
 
-      // Xử lý tempId nếu có
       if (data._tempId) {
         setMessages((prev) =>
           prev.map((msg) =>
@@ -882,7 +860,6 @@ const GroupChatInterface: React.FC = () => {
     });
   };
 
-  // Handle long press on message
   const handleLongPress = (message: GroupMessage) => {
     if (selectedMessage && selectedMessage._id === message._id) {
       setSelectedMessage(null);
@@ -893,32 +870,26 @@ const GroupChatInterface: React.FC = () => {
     }
   };
 
-  // Handle reply to message - Cải thiện chức năng trả lời tin nhắn
   const handleReply = (message: GroupMessage) => {
-    console.log("Reply to message:", message);
     setReplyToMessage(message);
     setIsReplying(true);
-    setSelectedMessage(null); // Đóng menu tương tác nếu đang mở
-    // Focus input
+    setSelectedMessage(null);
     const input = document.querySelector(
       ".message-form input"
     ) as HTMLInputElement;
     if (input) input.focus();
   };
 
-  // Cancel reply
   const cancelReply = () => {
     setReplyToMessage(null);
     setIsReplying(false);
   };
 
-  // Open emoji picker
   const openEmojiPicker = (message: GroupMessage) => {
     setSelectedMessage(message);
     setShowEmojiPicker(true);
   };
 
-  // Handle reaction
   const handleReaction = (emoji: string) => {
     if (!selectedMessage || !socket || !user || !groupId) return;
 
@@ -929,7 +900,6 @@ const GroupChatInterface: React.FC = () => {
       groupId: groupId,
     });
 
-    // Cập nhật state ngay lập tức để hiển thị reaction
     setMessages((prevMessages) =>
       prevMessages.map((msg) =>
         msg._id === selectedMessage._id
@@ -944,24 +914,20 @@ const GroupChatInterface: React.FC = () => {
       )
     );
 
-    // Close menu
     setSelectedMessage(null);
     setShowEmojiPicker(false);
   };
 
-  // Handle download file
   const handleDownloadFile = (message: GroupMessage) => {
     if (message.fileUrl) {
       window.open(message.fileUrl, "_blank");
     }
   };
 
-  // Toggle attachment menu
   const toggleAttachMenu = () => {
     setShowAttachMenu((prev) => !prev);
   };
 
-  // Handle file type selection
   const handleFileTypeSelect = (type: "image" | "video" | "audio" | "file") => {
     if (fileInputRef.current) {
       switch (type) {
@@ -984,24 +950,19 @@ const GroupChatInterface: React.FC = () => {
     setShowAttachMenu(false);
   };
 
-  // Open media preview - Cải thiện cách xem media
   const openMediaPreview = (message: GroupMessage) => {
-    console.log("Opening media preview:", message);
     if (message.type && ["image", "video", "audio"].includes(message.type)) {
       setMediaPreview(message);
     }
   };
 
-  // Delete message với hai tùy chọn
   const handleDeleteMessage = async (message: GroupMessage) => {
     if (!socket || !user || !groupId) return;
 
-    // Hiển thị hộp thoại với hai tùy chọn
     setSelectedMessageForDelete(message);
     setShowDeleteOptionsDialog(true);
   };
 
-  // Xóa tin nhắn với mọi người
   const deleteMessageForEveryone = async () => {
     if (!selectedMessageForDelete || !socket || !user || !groupId) return;
 
@@ -1015,7 +976,6 @@ const GroupChatInterface: React.FC = () => {
         }
       );
 
-      // Cập nhật state ngay lập tức
       setMessages((prevMessages) =>
         prevMessages.map((msg) =>
           msg._id === selectedMessageForDelete._id
@@ -1029,7 +989,6 @@ const GroupChatInterface: React.FC = () => {
         )
       );
 
-      // Thông báo cho các thành viên khác
       socket.emit("deleteGroupMessage", {
         messageId: selectedMessageForDelete._id,
         userId: user._id,
@@ -1037,7 +996,6 @@ const GroupChatInterface: React.FC = () => {
         deleteType: "everyone",
       });
 
-      // Đóng dialog
       setShowDeleteOptionsDialog(false);
       setSelectedMessageForDelete(null);
     } catch (error) {
@@ -1045,7 +1003,6 @@ const GroupChatInterface: React.FC = () => {
     }
   };
 
-  // Xóa tin nhắn chỉ với bạn
   const deleteMessageForMe = async () => {
     if (!selectedMessageForDelete || !user || !groupId) return;
 
@@ -1058,12 +1015,10 @@ const GroupChatInterface: React.FC = () => {
         }
       );
 
-      // Xóa tin nhắn khỏi danh sách chỉ ở phía client
       setMessages((prevMessages) =>
         prevMessages.filter((msg) => msg._id !== selectedMessageForDelete._id)
       );
 
-      // Đóng dialog
       setShowDeleteOptionsDialog(false);
       setSelectedMessageForDelete(null);
     } catch (error) {
@@ -1071,7 +1026,6 @@ const GroupChatInterface: React.FC = () => {
     }
   };
 
-  // Fetch media files in the group
   const fetchMediaFiles = () => {
     const media = messages
       .filter(
@@ -1096,14 +1050,39 @@ const GroupChatInterface: React.FC = () => {
     setMediaFiles(media);
   };
 
-  // Handle leave group
-  const handleLeaveGroup = async () => {
-    if (!user || !groupId) return;
+  const handleTransferAdminRole = async () => {
+    if (!transferToUserId || !groupId || !user) return;
 
-    const confirmed = await showConfirmDialog(
-      "Bạn có chắc chắn muốn rời khỏi nhóm này không?"
-    );
-    if (!confirmed) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `http://localhost:3005/api/groups/transfer-admin`,
+        {
+          groupId,
+          newAdminId: transferToUserId,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (socket) {
+        socket.emit("adminTransferred", {
+          groupId,
+          oldAdminId: user._id,
+          newAdminId: transferToUserId,
+        });
+      }
+
+      await handleLeaveAfterTransfer();
+    } catch (error) {
+      console.error("Error transferring admin role:", error);
+      alert("Không thể chuyển quyền quản trị. Vui lòng thử lại sau.");
+    }
+  };
+
+  const handleLeaveAfterTransfer = async () => {
+    if (!user || !groupId) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -1118,22 +1097,58 @@ const GroupChatInterface: React.FC = () => {
         }
       );
 
-      // Thông báo cho các thành viên khác
       if (socket) {
         socket.emit("memberRemovedFromGroup", {
           groupId,
-          memberId: user._id, // tự rời nhóm
+          memberId: user._id,
         });
       }
 
-      // Chuyển hướng người dùng
       window.location.href = "/";
     } catch (error) {
       console.error("Error leaving group:", error);
     }
   };
 
-  // Handle delete group
+  const handleLeaveGroup = async () => {
+    if (!user || !groupId) return;
+
+    const confirmed = await showConfirmDialog(
+      "Bạn có chắc chắn muốn rời khỏi nhóm này không?"
+    );
+    if (!confirmed) return;
+
+    if (userRole === "admin") {
+      setShowTransferAdminDialog(true);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `http://localhost:3005/api/groups/remove-member`,
+        {
+          groupId,
+          memberId: user._id,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (socket) {
+        socket.emit("memberRemovedFromGroup", {
+          groupId,
+          memberId: user._id,
+        });
+      }
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error leaving group:", error);
+    }
+  };
+
   const handleDeleteGroup = async () => {
     if (!user || !groupId) return;
 
@@ -1149,7 +1164,6 @@ const GroupChatInterface: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Thông báo cho tất cả thành viên
       if (socket) {
         socket.emit("groupDissolved", {
           groupId,
@@ -1157,25 +1171,17 @@ const GroupChatInterface: React.FC = () => {
         });
       }
 
-      // Chuyển hướng người dùng
       window.location.href = "/";
     } catch (error) {
       console.error("Error deleting group:", error);
     }
   };
 
-  // Chức năng chỉnh sửa tên nhóm
   const handleEditGroupName = () => {
     if (group) {
       setNewGroupName(group.name);
       setShowEditNameDialog(true);
     }
-  };
-
-  // Handle co-admin management
-  const handleManageCoAdmins = () => {
-    setShowManageCoAdminDialog(true);
-    setShowGroupOptions(false); // Close group options menu
   };
 
   if (loading) {
@@ -1191,6 +1197,13 @@ const GroupChatInterface: React.FC = () => {
   }
 
   const typingMembers = Array.from(typingUsers.values());
+
+  function handleManageCoAdmins(
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): void {
+    event.preventDefault();
+    setShowManageCoAdminDialog(true);
+  }
 
   return (
     <div className="group-chat-interface">
@@ -1255,47 +1268,35 @@ const GroupChatInterface: React.FC = () => {
             </button>
 
             {showMoreOptions && (
-              <div className="dropdown-menu">
-                <button onClick={() => {
-                  setShowSearchDialog(true);
-                  setShowMoreOptions(false);
-                }}>
-                  <FiSearch /> Search Messages
-                </button>
-                <button onClick={() => {
-                  setShowMediaGallery(true);
-                  setShowMoreOptions(false);
-                }}>
-                  <FiFileText /> Media Gallery
-                </button>
+              <div className="drpdown-menu">
                 {(userRole === "admin" || userRole === "coAdmin") && (
                   <>
                     <button onClick={handleEditGroupName}>
-                      <FiSettings /> Edit Group Name
-                    </button>
-                    <button onClick={() => setShowEditAvatarDialog(true)}>
-                      <FiImage /> Change Group Avatar
+                      <FiSettings /> Chỉnh sửa tên nhóm
                     </button>
                     <button onClick={() => setShowAddMemberDialog(true)}>
-                      <FiUserPlus /> Add Members
+                      <FiUserPlus /> Thêm thành viên
                     </button>
                     <button onClick={() => setShowRemoveMemberDialog(true)}>
-                      <FiUserX /> Remove Members
+                      <FiUserX /> Xóa thành viên
                     </button>
                     {userRole === "admin" && (
                       <button onClick={handleManageCoAdmins}>
-                        <FiUserCheck /> Manage Co-admins
+                        <FiUserCheck /> Quản lý phó nhóm
                       </button>
                     )}
                     <div className="dropdown-divider"></div>
                   </>
                 )}
+                <button onClick={() => setShowMediaGallery(true)}>
+                  <FiImage /> Thư viện media
+                </button>
                 <button onClick={handleLeaveGroup} className="danger-option">
-                  <FiArchive /> Leave Group
+                  <FiArchive /> Rời nhóm
                 </button>
                 {userRole === "admin" && (
                   <button onClick={handleDeleteGroup} className="danger-option">
-                    <FiTrash2 /> Delete Group
+                    <FiTrash2 /> Xóa nhóm
                   </button>
                 )}
               </div>
@@ -1304,7 +1305,6 @@ const GroupChatInterface: React.FC = () => {
         </div>
       </div>
 
-      {/* Members list dialog */}
       {showMembersList && (
         <div
           className="modal-overlay"
@@ -1337,11 +1337,8 @@ const GroupChatInterface: React.FC = () => {
                   group.coAdmins.includes(memberId);
                 const isOnline = onlineUsers.has(memberId);
 
-                // Kiểm tra người dùng hiện tại có quyền xóa thành viên này không
                 const canRemoveMember =
-                  // Admin có thể xóa mọi người trừ chính họ
                   (userRole === "admin" && memberId !== user?._id) ||
-                  // Co-Admin có thể xóa thành viên thường
                   (userRole === "coAdmin" &&
                     !isAdmin &&
                     !isCoAdmin &&
@@ -1372,12 +1369,10 @@ const GroupChatInterface: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Hiển thị nút xóa thành viên dựa trên phân quyền */}
                     {canRemoveMember && (
                       <button
                         className="remove-button"
                         onClick={async () => {
-                          // Xác nhận xóa thành viên
                           const confirmed = await showConfirmDialog(
                             `Bạn có chắc chắn muốn xóa ${memberName} khỏi nhóm?`
                           );
@@ -1397,7 +1392,6 @@ const GroupChatInterface: React.FC = () => {
                               }
                             );
 
-                            // Thông báo qua socket
                             if (socket) {
                               socket.emit("memberRemovedFromGroup", {
                                 groupId,
@@ -1406,10 +1400,8 @@ const GroupChatInterface: React.FC = () => {
                               });
                             }
 
-                            // Cập nhật thông tin nhóm
                             fetchGroupInfo();
 
-                            // Thông báo thành công
                             alert(`Đã xóa ${memberName} khỏi nhóm`);
                           } catch (error) {
                             console.error("Error removing member:", error);
@@ -1423,7 +1415,6 @@ const GroupChatInterface: React.FC = () => {
                       </button>
                     )}
 
-                    {/* Hiển thị nút thăng cấp phó nhóm cho admin */}
                     {userRole === "admin" && !isAdmin && !isCoAdmin && (
                       <button
                         className="promote-button"
@@ -1441,7 +1432,6 @@ const GroupChatInterface: React.FC = () => {
                               }
                             );
 
-                            // Thông báo qua socket
                             if (socket) {
                               socket.emit("addCoAdmin", {
                                 groupId,
@@ -1450,10 +1440,8 @@ const GroupChatInterface: React.FC = () => {
                               });
                             }
 
-                            // Cập nhật thông tin nhóm
                             fetchGroupInfo();
 
-                            // Thông báo thành công
                             alert(`Đã thăng cấp ${memberName} làm phó nhóm`);
                           } catch (error) {
                             console.error("Error adding co-admin:", error);
@@ -1464,7 +1452,6 @@ const GroupChatInterface: React.FC = () => {
                       </button>
                     )}
 
-                    {/* Hiển thị nút hạ cấp phó nhóm cho admin */}
                     {userRole === "admin" && isCoAdmin && (
                       <button
                         className="demote-button"
@@ -1482,7 +1469,6 @@ const GroupChatInterface: React.FC = () => {
                               }
                             );
 
-                            // Thông báo qua socket
                             if (socket) {
                               socket.emit("removeCoAdmin", {
                                 groupId,
@@ -1491,10 +1477,8 @@ const GroupChatInterface: React.FC = () => {
                               });
                             }
 
-                            // Cập nhật thông tin nhóm
                             fetchGroupInfo();
 
-                            // Thông báo thành công
                             alert(
                               `Đã hạ cấp ${memberName} xuống thành viên thường`
                             );
@@ -1514,7 +1498,6 @@ const GroupChatInterface: React.FC = () => {
         </div>
       )}
 
-      {/* Add member dialog */}
       {showAddMemberDialog && (
         <div
           className="modal-overlay"
@@ -1540,7 +1523,6 @@ const GroupChatInterface: React.FC = () => {
               <button
                 className="search-button"
                 onClick={() => {
-                  // Implement search users functionality
                   const searchUsers = async () => {
                     try {
                       const token = localStorage.getItem("token");
@@ -1550,7 +1532,6 @@ const GroupChatInterface: React.FC = () => {
                           headers: { Authorization: `Bearer ${token}` },
                         }
                       );
-                      // Filter out users who are already members
                       const filteredResults = response.data.filter(
                         (user: any) =>
                           !group.members.some((member) =>
@@ -1605,7 +1586,6 @@ const GroupChatInterface: React.FC = () => {
                           }
                         );
 
-                        // Emit socket event
                         if (socket) {
                           socket.emit("addMemberToGroup", {
                             groupId,
@@ -1614,7 +1594,6 @@ const GroupChatInterface: React.FC = () => {
                           });
                         }
 
-                        // Refresh group info
                         fetchGroupInfo();
                         setShowAddMemberDialog(false);
                       } catch (error) {
@@ -1634,7 +1613,6 @@ const GroupChatInterface: React.FC = () => {
         </div>
       )}
 
-      {/* Delete options dialog */}
       {showDeleteOptionsDialog && selectedMessageForDelete && (
         <div
           className="modal-overlay"
@@ -1668,7 +1646,6 @@ const GroupChatInterface: React.FC = () => {
         </div>
       )}
 
-      {/* Edit group name dialog */}
       {showEditNameDialog && (
         <div
           className="modal-overlay"
@@ -1715,13 +1692,11 @@ const GroupChatInterface: React.FC = () => {
                         }
                       );
 
-                      // Update local state
                       setGroup((prev) =>
                         prev ? { ...prev, name: newGroupName } : null
                       );
                       setShowEditNameDialog(false);
 
-                      // Notify other members
                       if (socket) {
                         socket.emit("groupUpdated", {
                           groupId,
@@ -1741,7 +1716,6 @@ const GroupChatInterface: React.FC = () => {
         </div>
       )}
 
-      {/* Manage co-admin dialog */}
       {showManageCoAdminDialog && group && user && socket && (
         <CoAdminDialog
           isOpen={showManageCoAdminDialog}
@@ -1754,7 +1728,6 @@ const GroupChatInterface: React.FC = () => {
         />
       )}
 
-      {/* Remove member dialog */}
       {showRemoveMemberDialog && (
         <div
           className="modal-overlay"
@@ -1777,16 +1750,13 @@ const GroupChatInterface: React.FC = () => {
               <div className="members-list">
                 {group.members
                   .filter((member) => {
-                    // Lọc ra những người có thể bị xóa dựa trên quyền hạn của người dùng hiện tại
                     const memberId =
                       typeof member === "object" ? member._id : member;
 
-                    // Nếu là Admin, có thể xóa tất cả ngoại trừ chính mình
                     if (userRole === "admin") {
                       return memberId !== user?._id;
                     }
 
-                    // Nếu là Co-Admin, không thể xóa admin hoặc co-admin khác
                     const isAdmin =
                       typeof group.admin === "object"
                         ? group.admin._id === memberId
@@ -1837,7 +1807,6 @@ const GroupChatInterface: React.FC = () => {
                                 }
                               );
 
-                              // Thông báo qua socket
                               if (socket) {
                                 socket.emit("memberRemovedFromGroup", {
                                   groupId,
@@ -1846,10 +1815,8 @@ const GroupChatInterface: React.FC = () => {
                                 });
                               }
 
-                              // Cập nhật thông tin nhóm
                               fetchGroupInfo();
 
-                              // Thông báo thành công
                               alert(`Đã xóa ${memberName} khỏi nhóm`);
                             } catch (error) {
                               console.error("Error removing member:", error);
@@ -1967,7 +1934,6 @@ const GroupChatInterface: React.FC = () => {
         </button>
       </form>
 
-      {/* Media preview overlay */}
       <MediaPreview
         mediaPreview={mediaPreview}
         closeMediaPreview={() => setMediaPreview(null)}
@@ -1983,6 +1949,108 @@ const GroupChatInterface: React.FC = () => {
               ></div>
             </div>
             <div className="progress-text">{uploadProgress}%</div>
+          </div>
+        </div>
+      )}
+
+      {showTransferAdminDialog && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowTransferAdminDialog(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Chuyển quyền nhóm trưởng</h3>
+              <button
+                className="close-button"
+                onClick={() => setShowTransferAdminDialog(false)}
+              >
+                <FiX />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>
+                Bạn cần chọn một thành viên để chuyển quyền nhóm trưởng trước
+                khi rời nhóm.
+              </p>
+
+              <div className="members-list">
+                {group?.members
+                  .filter((member) => {
+                    const memberId =
+                      typeof member === "object" ? member._id : member;
+                    return memberId !== user?._id;
+                  })
+                  .map((member) => {
+                    const memberId =
+                      typeof member === "object" ? member._id : member;
+                    const memberName =
+                      typeof member === "object" ? member.name : "Unknown";
+                    const memberAvt =
+                      typeof member === "object" ? member.avt : null;
+                    const isCoAdmin =
+                      Array.isArray(group?.coAdmins) &&
+                      group?.coAdmins.includes(memberId);
+
+                    return (
+                      <div key={memberId} className="member-item">
+                        <div className="member-avatar">
+                          {memberAvt ? (
+                            <img src={memberAvt} alt={memberName} />
+                          ) : (
+                            <div className="avatar-placeholder">
+                              {memberName.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="member-info">
+                          <div className="member-name">
+                            {memberName}
+                            {isCoAdmin && (
+                              <span className="role-badge co-admin">
+                                Phó nhóm
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          className={`select-admin-button ${
+                            transferToUserId === memberId ? "selected" : ""
+                          }`}
+                          onClick={() => setTransferToUserId(memberId)}
+                        >
+                          {transferToUserId === memberId ? "Đã chọn" : "Chọn"}
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
+
+              <div className="button-group">
+                <button
+                  className="cancel-button"
+                  onClick={() => setShowTransferAdminDialog(false)}
+                >
+                  Hủy
+                </button>
+                <button
+                  className="confirm-button"
+                  disabled={!transferToUserId}
+                  onClick={handleTransferAdminRole}
+                >
+                  Chuyển quyền và rời nhóm
+                </button>
+              </div>
+
+              <div className="auto-select-note">
+                <p>
+                  <i>
+                    Ghi chú: Nếu có phó nhóm, chúng tôi khuyến nghị bạn nên chọn
+                    một phó nhóm làm nhóm trưởng mới.
+                  </i>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
