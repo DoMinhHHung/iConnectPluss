@@ -1,6 +1,6 @@
 import { Message } from "./ChatInterfaceComponent";
 
-// Mở rộng interface Message để hỗ trợ tính năng group chat
+// interface Message để hỗ trợ tính năng group chat
 export interface GroupMessage extends Message {
   groupId?: string;
   chatType?: "private" | "group";
@@ -25,8 +25,7 @@ export interface Group {
   _id: string;
   name: string;
   description?: string;
-  avatarUrl?: string;
-  admin: AdminType; // Có thể là object với _id hoặc string
+  admin: AdminType;
   coAdmins: string[];
   members: GroupMember[];
   createdAt: string;

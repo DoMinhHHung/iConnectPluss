@@ -8,7 +8,6 @@ const GroupsPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    // Kiểm tra xác thực người dùng
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
