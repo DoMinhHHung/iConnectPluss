@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ee5e13d0-f478-4752-ad48-ae39e278f842" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/iConnect.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/.env" beforeDir="false" afterPath="$PROJECT_DIR$/server/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/Models/groupModel.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/Models/groupModel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/Models/messageModels.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/Models/messageModels.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/Routes/chatRoute.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/Routes/chatRoute.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/Routes/friendshipRoute.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/Routes/friendshipRoute.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/Routes/groupRoute.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/Routes/groupRoute.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/Routes/searchRoute.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/Routes/searchRoute.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/Routes/userRoute.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/Routes/userRoute.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/controllers/chatController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/controllers/chatController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/controllers/friendshipController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/controllers/friendshipController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/controllers/groupController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/controllers/groupController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/controllers/searchController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/controllers/searchController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/controllers/userController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/controllers/userController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/server/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/server/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/server/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web" beforeDir="false" afterPath="$PROJECT_DIR$/web" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/eslint.config.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/next.config.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/postcss.config.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/globals.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/layout.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/tsconfig.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 5
+}]]></component>
+  <component name="ProjectId" id="2wdNPJavwPjWFzEtzTbSc3vbtgV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "E:/Project/iConnect - Copy"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ee5e13d0-f478-4752-ad48-ae39e278f842" name="Changes" comment="" />
+      <created>1746367466238</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1746367466238</updated>
+    </task>
+    <servers />
+  </component>
+</project>

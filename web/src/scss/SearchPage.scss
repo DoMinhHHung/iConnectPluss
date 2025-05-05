@@ -1,0 +1,212 @@
+.search-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+  }
+
+  .search-form {
+    margin-bottom: 30px;
+
+    .search-input-container {
+      display: flex;
+      margin-bottom: 15px;
+
+      .search-input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid #ddd;
+        border-radius: 4px 0 0 4px;
+        font-size: 16px;
+
+        &:focus {
+          outline: none;
+          border-color: #3498db;
+        }
+      }
+
+      .search-button {
+        padding: 12px 25px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+        font-weight: bold;
+
+        &:hover {
+          background-color: #2980b9;
+        }
+      }
+    }
+
+    .search-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      .filter-btn {
+        padding: 8px 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background-color: #e9ecef;
+        }
+
+        &.active {
+          background-color: #3498db;
+          color: white;
+          border-color: #3498db;
+        }
+      }
+    }
+  }
+
+  .search-results {
+    h2 {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      color: #2c3e50;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #7f8c8d;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 30px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      color: #7f8c8d;
+    }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+
+      .result-item {
+        display: flex;
+        padding: 15px;
+        background-color: white;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-icon {
+          margin-right: 15px;
+          font-size: 24px;
+          width: 50px;
+          height: 50px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #f8f9fa;
+          border-radius: 50%;
+
+          .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+          }
+
+          i {
+            color: #3498db;
+          }
+        }
+
+        .result-content {
+          flex: 1;
+
+          h3 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #2c3e50;
+          }
+
+          p {
+            margin: 5px 0;
+            color: #7f8c8d;
+            font-size: 14px;
+
+            &.user-info {
+              margin: 2px 0;
+              font-size: 14px;
+              color: #7f8c8d;
+            }
+          }
+
+          small {
+            display: block;
+            margin-top: 8px;
+            color: #95a5a6;
+            font-size: 12px;
+          }
+        }
+
+        &.result-user {
+          border-left: 3px solid #3498db;
+        }
+
+        &.result-group {
+          border-left: 3px solid #2ecc71;
+
+          .result-icon i {
+            color: #2ecc71;
+          }
+        }
+
+        &.result-message {
+          border-left: 3px solid #9b59b6;
+
+          .result-icon i {
+            color: #9b59b6;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .search-page {
+    padding: 15px;
+
+    .search-form {
+      .search-filters {
+        justify-content: center;
+      }
+    }
+
+    .results-list {
+      .result-item {
+        flex-direction: column;
+
+        .result-icon {
+          margin-right: 0;
+          margin-bottom: 10px;
+        }
+      }
+    }
+  }
+}

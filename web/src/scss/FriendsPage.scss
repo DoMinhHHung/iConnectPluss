@@ -1,0 +1,283 @@
+@import "_variables";
+
+.friends-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+
+  .friends-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+
+    h1 {
+      font-size: $font-size-xl;
+      color: $text-color;
+      margin: 0;
+    }
+
+    .search-container {
+      display: flex;
+      width: 40%;
+
+      input {
+        flex: 1;
+        padding: $spacing-sm $spacing-md;
+        border: 1px solid $light-gray;
+        border-radius: $border-radius 0 0 $border-radius;
+        font-size: $font-size-base;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+        }
+      }
+
+      .search-button {
+        padding: $spacing-sm $spacing-md;
+        background-color: $primary-color;
+        color: $white;
+        border: none;
+        border-radius: 0 $border-radius $border-radius 0;
+        cursor: pointer;
+        transition: background-color $transition-fast;
+
+        &:hover {
+          background-color: darken($primary-color, 10%);
+        }
+      }
+    }
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid $light-gray;
+    margin-bottom: $spacing-lg;
+
+    .tab-button {
+      padding: $spacing-md $spacing-lg;
+      background: none;
+      border: none;
+      color: $text-color;
+      font-size: $font-size-base;
+      font-weight: $font-weight-medium;
+      cursor: pointer;
+      transition: all $transition-fast;
+
+      &:hover {
+        color: $primary-color;
+      }
+
+      &.active {
+        color: $primary-color;
+        border-bottom: 2px solid $primary-color;
+      }
+    }
+  }
+
+  .search-section {
+    background-color: $light-gray;
+    padding: $spacing-md;
+    border-radius: $border-radius;
+    margin-bottom: $spacing-lg;
+
+    h2 {
+      font-size: $font-size-lg;
+      margin-top: 0;
+      margin-bottom: $spacing-md;
+    }
+
+    .close-search-button {
+      display: block;
+      margin: $spacing-md auto 0;
+      padding: $spacing-sm $spacing-md;
+      background-color: $secondary-color;
+      color: $white;
+      border: none;
+      border-radius: $border-radius;
+      cursor: pointer;
+      transition: background-color $transition-fast;
+
+      &:hover {
+        background-color: darken($secondary-color, 10%);
+      }
+    }
+  }
+
+  .friends-list,
+  .requests-list,
+  .search-results {
+    .friend-item,
+    .request-item,
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      padding: $spacing-md;
+      border-bottom: 1px solid $light-gray;
+
+      &:hover {
+        background-color: rgba($light-gray, 0.3);
+      }
+
+      .friend-avatar,
+      .request-avatar,
+      .result-avatar {
+        position: relative;
+        width: 50px;
+        height: 50px;
+        border-radius: $border-radius-circle;
+        overflow: hidden;
+        margin-right: $spacing-md;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .avatar-placeholder {
+          width: 100%;
+          height: 100%;
+          background-color: $primary-color;
+          color: $white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: $font-weight-bold;
+          font-size: $font-size-lg;
+        }
+
+        .status-indicator {
+          position: absolute;
+          bottom: 2px;
+          right: 2px;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+
+          &.online {
+            background-color: $success-color;
+            box-shadow: 0 0 0 2px $white;
+          }
+
+          &.offline {
+            background-color: $gray;
+            box-shadow: 0 0 0 2px $white;
+          }
+        }
+      }
+
+      .friend-info,
+      .request-info,
+      .result-info {
+        flex: 1;
+
+        .friend-name,
+        .request-name,
+        .result-name {
+          margin: 0 0 $spacing-xs 0;
+          font-size: $font-size-base;
+          font-weight: $font-weight-medium;
+        }
+
+        .friend-status,
+        .request-date,
+        .result-email {
+          margin: 0;
+          color: $text-muted;
+          font-size: $font-size-sm;
+        }
+      }
+
+      .friend-actions,
+      .request-actions,
+      .result-actions {
+        display: flex;
+        gap: $spacing-sm;
+
+        button {
+          padding: $spacing-sm $spacing-md;
+          border: none;
+          border-radius: $border-radius;
+          font-size: $font-size-sm;
+          cursor: pointer;
+          transition: all $transition-fast;
+
+          &.chat-button {
+            background-color: $primary-color;
+            color: $white;
+
+            &:hover {
+              background-color: darken($primary-color, 10%);
+            }
+          }
+
+          &.remove-button,
+          .reject-button {
+            background-color: $danger-color;
+            color: $white;
+
+            &:hover {
+              background-color: darken($danger-color, 10%);
+            }
+          }
+
+          &.accept-button,
+          &.add-button {
+            background-color: $success-color;
+            color: $white;
+
+            &:hover {
+              background-color: darken($success-color, 10%);
+            }
+          }
+
+          &.cancel-button {
+            background-color: $gray;
+            color: $white;
+
+            &:hover {
+              background-color: darken($gray, 10%);
+            }
+          }
+
+          &.pending-button {
+            background-color: $light-gray;
+            color: $text-color;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: $spacing-xl;
+    color: $text-muted;
+    font-size: $font-size-base;
+    background-color: rgba($light-gray, 0.3);
+    border-radius: $border-radius;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .loading,
+  .loading-search {
+    text-align: center;
+    padding: $spacing-xl;
+    color: $text-muted;
+    font-size: $font-size-base;
+  }
+
+  .error-message {
+    background-color: rgba($danger-color, 0.1);
+    border-left: 3px solid $danger-color;
+    color: $danger-color;
+    padding: $spacing-md;
+    margin-bottom: $spacing-lg;
+  }
+}

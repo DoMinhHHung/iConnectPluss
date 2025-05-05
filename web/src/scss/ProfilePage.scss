@@ -1,0 +1,320 @@
+@import "variables";
+
+.profile-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+  padding-bottom: $spacing-2xl;
+
+  .loading-container,
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl 0;
+
+    p {
+      margin-top: $spacing-md;
+      color: $text-color-secondary;
+    }
+  }
+
+  .profile-header {
+    position: relative;
+    margin-bottom: $spacing-xl;
+
+    .profile-banner {
+      height: 200px;
+      background-color: $primary-color;
+      background-image: linear-gradient(
+        135deg,
+        $primary-color,
+        $secondary-color
+      );
+      border-radius: 0 0 $border-radius $border-radius;
+    }
+
+    .profile-info-container {
+      position: relative;
+      margin-top: -60px;
+      padding: 0 $spacing-lg;
+      display: flex;
+      align-items: flex-end;
+
+      .profile-avatar {
+        position: relative;
+        margin-top: -50px;
+        margin-right: $spacing-lg;
+
+        img {
+          width: 100px;
+          height: 100px;
+          border-radius: $border-radius-circle;
+          object-fit: cover;
+          border: 3px solid $white;
+          box-shadow: $box-shadow;
+
+          &.editable {
+            cursor: pointer;
+            transition: transform $transition-fast, box-shadow $transition-fast;
+
+            &:hover {
+              transform: scale(1.05);
+              box-shadow: $box-shadow-medium;
+            }
+
+            &:hover::after {
+              content: "\f030";
+              font-family: "FontAwesome";
+              position: absolute;
+              bottom: 5px;
+              right: 5px;
+              background-color: rgba(0, 0, 0, 0.7);
+              color: $white;
+              border-radius: $border-radius-circle;
+              width: 25px;
+              height: 25px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+            }
+          }
+        }
+      }
+
+      .profile-name {
+        padding-bottom: $spacing-sm;
+
+        h1 {
+          margin: 0;
+          color: $text-color;
+          font-size: 1.75rem;
+          font-weight: $font-weight-bold;
+        }
+
+        .badge {
+          margin-left: $spacing-sm;
+          font-size: $font-size-sm;
+          font-weight: $font-weight-normal;
+          padding: $spacing-xs $spacing-sm;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
+  .profile-content {
+    padding: 0 $spacing-lg;
+
+    .profile-card {
+      background-color: $white;
+      border-radius: $border-radius;
+      box-shadow: $box-shadow;
+      padding: $spacing-lg;
+      margin-bottom: $spacing-lg;
+
+      h2 {
+        font-size: 1.25rem;
+        color: $text-color;
+        margin-bottom: $spacing-lg;
+        padding-bottom: $spacing-sm;
+        border-bottom: 1px solid $light-gray;
+      }
+
+      .info-group {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-md;
+
+        .info-item {
+          display: flex;
+          flex-direction: column;
+
+          label {
+            font-weight: $font-weight-medium;
+            color: $text-color-secondary;
+            margin-bottom: $spacing-xs;
+            font-size: $font-size-sm;
+          }
+
+          p {
+            margin: 0;
+            color: $text-color;
+          }
+        }
+      }
+
+      .activity-stats {
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+
+        .activity-item {
+          display: flex;
+          flex-direction: column;
+
+          .activity-count {
+            font-size: 1.5rem;
+            font-weight: $font-weight-bold;
+            color: $primary-color;
+          }
+
+          .activity-label {
+            font-size: $font-size-sm;
+            color: $text-color-secondary;
+          }
+        }
+      }
+
+      .profile-actions {
+        .btn {
+          width: 100%;
+          padding: $spacing-sm;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .profile-page {
+    .profile-header {
+      .profile-info-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+
+        .profile-avatar {
+          margin-right: 0;
+          margin-bottom: $spacing-md;
+        }
+      }
+    }
+
+    .profile-content {
+      .info-item {
+        padding: $spacing-sm 0;
+      }
+    }
+  }
+}
+
+.avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: $border-radius-circle;
+  background-color: $primary-color;
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.25rem;
+  font-weight: $font-weight-bold;
+  border: 3px solid $white;
+  box-shadow: $box-shadow;
+
+  &.editable {
+    cursor: pointer;
+    transition: transform $transition-fast, box-shadow $transition-fast;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: $box-shadow-medium;
+    }
+
+    &:hover::after {
+      content: "\f030";
+      font-family: "FontAwesome";
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: $white;
+      border-radius: $border-radius-circle;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+  }
+}
+
+// CSS cho modal upload avatar
+.avatar-upload-modal {
+  position: fixed;
+  z-index: $z-index-modal;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .avatar-upload-container {
+    background-color: $white;
+    border-radius: $border-radius;
+    padding: $spacing-lg;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: $box-shadow-heavy;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: $spacing-lg;
+      font-size: 1.25rem;
+      text-align: center;
+    }
+
+    .avatar-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: $spacing-lg;
+
+      img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: $border-radius;
+      }
+    }
+
+    .upload-actions {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-md;
+
+      .upload-input-container {
+        position: relative;
+
+        input[type="file"] {
+          position: absolute;
+          left: 0;
+          top: 0;
+          opacity: 0;
+          width: 100%;
+          height: 100%;
+          cursor: pointer;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+
+      .btn-row {
+        display: flex;
+        gap: $spacing-md;
+
+        .btn {
+          flex: 1;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,162 @@
+@import "./variables";
+
+.group-list-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .group-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid $border-color;
+
+    h2 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .create-group-button {
+      background-color: $primary-color;
+      color: white;
+      border: none;
+      border-radius: $border-radius;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-weight: 500;
+
+      &:hover {
+        background-color: darken($primary-color, 10%);
+      }
+    }
+  }
+
+  .group-list-error {
+    margin: 10px;
+    padding: 10px;
+    background-color: $danger-light;
+    color: $danger-color;
+    border-radius: $border-radius;
+  }
+
+  .no-groups {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+
+    .no-groups-icon {
+      font-size: 4rem;
+      color: $medium-gray;
+      margin-bottom: 20px;
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: $text-color-secondary;
+    }
+
+    .create-first-group {
+      background-color: $primary-color;
+      color: white;
+      border: none;
+      border-radius: $border-radius;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-weight: 500;
+
+      &:hover {
+        background-color: darken($primary-color, 10%);
+      }
+    }
+  }
+
+  .groups {
+    overflow-y: auto;
+    padding: 10px;
+
+    .group-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: $border-radius;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: $light-gray;
+      }
+
+      .group-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-right: 12px;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .avatar-placeholder {
+          background-color: $secondary-color;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: white;
+          font-weight: bold;
+          font-size: 1.2rem;
+        }
+      }
+
+      .group-info {
+        flex: 1;
+        min-width: 0;
+
+        .group-name {
+          margin: 0 0 5px 0;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .last-message {
+          margin: 0;
+          font-size: 0.85rem;
+          color: $text-color-secondary;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .last-activity {
+        font-size: 0.75rem;
+        color: $text-color-secondary;
+      }
+
+      .member-count {
+        display: flex;
+        align-items: center;
+        margin-left: 12px;
+        color: $text-color-secondary;
+        font-size: 0.85rem;
+
+        svg {
+          margin-right: 3px;
+        }
+      }
+    }
+  }
+}

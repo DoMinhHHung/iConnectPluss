@@ -1,0 +1,141 @@
+@import "_variables";
+
+.friend-list-container {
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.friend-list-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.friend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f5f8ff;
+  }
+}
+
+.friend-avatar-container {
+  position: relative;
+  margin-right: 12px;
+}
+
+.friend-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #3498db;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.online-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+
+  &.online {
+    background-color: #2ecc71;
+  }
+
+  &.offline {
+    background-color: #95a5a6;
+  }
+}
+
+.friend-info {
+  flex: 1;
+}
+
+.friend-name {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.friend-status {
+  font-size: 13px;
+  color: #7f8c8d;
+}
+
+.friend-list-loading,
+.friend-list-error,
+.friend-list-empty {
+  padding: 20px;
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.friend-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+
+  p {
+    margin-bottom: 0;
+  }
+
+  button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .friend-list-container {
+    padding: 10px;
+  }
+
+  .friend-avatar,
+  .avatar-placeholder {
+    width: 35px;
+    height: 35px;
+  }
+
+  .friend-name {
+    font-size: 14px;
+  }
+
+  .friend-status {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,27 @@
+.groups-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h1 {
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1.8rem;
+  }
+
+  .page-description {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: #666;
+}

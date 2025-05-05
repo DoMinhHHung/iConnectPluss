@@ -1,0 +1,25 @@
+.group-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px); // Trừ chiều cao của navbar
+  width: 100%;
+
+  .group-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+
+    @media (max-width: 768px) {
+      padding: 10px;
+    }
+  }
+
+  .group-chat-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+  }
+}
