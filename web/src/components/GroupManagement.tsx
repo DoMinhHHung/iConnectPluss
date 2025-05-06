@@ -27,6 +27,8 @@ const GroupManagement: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     fetchGroups();
@@ -74,8 +76,11 @@ const GroupManagement: React.FC = () => {
       return;
     }
 
-    if (selectedMembers.length === 0) {
-      setError("Vui lòng chọn ít nhất một thành viên");
+    // Kiểm tra số lượng thành viên (phải có ít nhất 3 thành viên bao gồm người tạo)
+    if (selectedMembers.length < 2) {
+      // 2 thành viên được chọn + 1 người tạo = 3 người
+      setErrorMessage("Nhóm phải có ít nhất 3 thành viên (bao gồm bạn).");
+      setShowErrorDialog(true);
       return;
     }
 
@@ -98,9 +103,14 @@ const GroupManagement: React.FC = () => {
       setSelectedMembers([]);
       setIsCreating(false);
       fetchGroups();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating group:", error);
-      setError("Đã xảy ra lỗi khi tạo nhóm");
+      if (error.response?.data?.message) {
+        setErrorMessage(error.response.data.message);
+        setShowErrorDialog(true);
+      } else {
+        setError("Đã xảy ra lỗi khi tạo nhóm");
+      }
     }
   };
 
@@ -154,6 +164,36 @@ const GroupManagement: React.FC = () => {
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
+      {showErrorDialog && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowErrorDialog(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Lỗi Tạo Nhóm</h3>
+              <button
+                className="close-button"
+                onClick={() => setShowErrorDialog(false)}
+              >
+                <span>&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>{errorMessage}</p>
+              <div className="button-group">
+                <button
+                  className="ok-button"
+                  onClick={() => setShowErrorDialog(false)}
+                >
+                  Đồng ý
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isCreating && (
         <div className="create-group-form">
           <h3>Tạo nhóm mới</h3>
@@ -180,7 +220,15 @@ const GroupManagement: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>Chọn thành viên</label>
+              <label>
+                Chọn thành viên{" "}
+                <span className="required-members">
+                  ({selectedMembers.length}/2 tối thiểu)
+                </span>
+              </label>
+              <p className="helper-text">
+                Nhóm phải có ít nhất 3 thành viên (bao gồm bạn)
+              </p>
               <div className="member-list">
                 {friends.map((friend) => (
                   <div key={friend._id} className="member-item">
@@ -207,6 +255,12 @@ const GroupManagement: React.FC = () => {
                   </div>
                 ))}
               </div>
+              {selectedMembers.length < 2 && (
+                <p className="validation-warning">
+                  ⚠️ Bạn cần chọn ít nhất 2 thành viên để tạo nhóm (tổng cộng là
+                  3 người bao gồm bạn)
+                </p>
+              )}
             </div>
             <div className="form-actions">
               <button type="submit" className="btn-submit">

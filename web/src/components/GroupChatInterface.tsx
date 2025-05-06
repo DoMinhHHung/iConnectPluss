@@ -1211,7 +1211,9 @@ const GroupChatInterface: React.FC = () => {
         <div className="group-info">
           <div className="group-avatar">
             {
-              <div className="avatar-placeholder">
+         
+ 
+                            <div className="avatar-placeholder">
                 {group.name.charAt(0).toUpperCase()}
               </div>
             }

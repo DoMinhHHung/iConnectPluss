@@ -49,10 +49,13 @@ const CoAdminDialog: React.FC<CoAdminDialogProps> = ({
   const handleSearch = () => {
     if (coAdminSearchTerm.trim()) {
       const results = group.members.filter((member) => {
-        const memberName = typeof member === "object" ? member.name : "";
-        return memberName
-          .toLowerCase()
-          .includes(coAdminSearchTerm.toLowerCase());
+        // Chỉ lấy các thành viên là object để có thể truy cập thuộc tính name
+        if (typeof member === "object" && member !== null) {
+          return member.name
+            .toLowerCase()
+            .includes(coAdminSearchTerm.toLowerCase());
+        }
+        return false;
       });
 
       // Lọc ra những người đã là admin hoặc phó nhóm
@@ -138,6 +141,54 @@ const CoAdminDialog: React.FC<CoAdminDialogProps> = ({
       console.error("Error removing co-admin:", error);
       alert("Không thể hạ cấp thành viên. Vui lòng thử lại sau.");
     }
+  };
+
+  const renderCurrentCoAdmins = () => {
+    // Kiểm tra nếu không có thành viên nào
+    if (!group || !group.members || group.members.length === 0) {
+      return (
+        <div className="no-results">Không có thành viên nào trong nhóm</div>
+      );
+    }
+
+    // Lọc ra các thành viên là phó nhóm
+    const coAdmins = group.members.filter((member) => {
+      const memberId = typeof member === "object" ? member._id : member;
+      return Array.isArray(group.coAdmins) && group.coAdmins.includes(memberId);
+    });
+
+    if (coAdmins.length === 0) {
+      return <div className="no-results">Nhóm hiện không có phó nhóm</div>;
+    }
+
+    return coAdmins.map((member) => {
+      const memberId = typeof member === "object" ? member._id : member;
+      const memberName = typeof member === "object" ? member.name : "Unknown";
+      const memberAvt = typeof member === "object" ? member.avt : null;
+
+      return (
+        <div key={memberId} className="member-item">
+          <div className="member-avatar">
+            {memberAvt ? (
+              <img src={memberAvt} alt={memberName} />
+            ) : (
+              <div className="avatar-placeholder">
+                {memberName.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="member-info">
+            <div className="member-name">{memberName}</div>
+          </div>
+          <button
+            className="demote-button"
+            onClick={() => handleRemoveCoAdmin(memberId, memberName)}
+          >
+            <FiUserX /> Hủy quyền
+          </button>
+        </div>
+      );
+    });
   };
 
   return (
@@ -233,57 +284,7 @@ const CoAdminDialog: React.FC<CoAdminDialogProps> = ({
           ) : (
             <div className="remove-coadmin-section">
               <h4>Danh sách phó nhóm hiện tại</h4>
-              <div className="co-admins-list">
-                {group.members
-                  .filter((member) => {
-                    const memberId =
-                      typeof member === "object" ? member._id : member;
-                    return (
-                      Array.isArray(group.coAdmins) &&
-                      group.coAdmins.includes(memberId)
-                    );
-                  })
-                  .map((member) => {
-                    const memberId =
-                      typeof member === "object" ? member._id : member;
-                    const memberName =
-                      typeof member === "object" ? member.name : "Unknown";
-                    const memberAvt =
-                      typeof member === "object" ? member.avt : null;
-
-                    return (
-                      <div key={memberId} className="member-item">
-                        <div className="member-avatar">
-                          {memberAvt ? (
-                            <img src={memberAvt} alt={memberName} />
-                          ) : (
-                            <div className="avatar-placeholder">
-                              {memberName.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-                        <div className="member-info">
-                          <div className="member-name">
-                            {memberName}
-                            {memberId === userId && " (Bạn)"}
-                          </div>
-                        </div>
-                        <button
-                          className="demote-button"
-                          onClick={() =>
-                            handleRemoveCoAdmin(memberId, memberName)
-                          }
-                        >
-                          <FiUserX /> Hủy quyền
-                        </button>
-                      </div>
-                    );
-                  })}
-                {(!Array.isArray(group.coAdmins) ||
-                  group.coAdmins.length === 0) && (
-                  <div className="no-results">Nhóm hiện không có phó nhóm</div>
-                )}
-              </div>
+              <div className="co-admins-list">{renderCurrentCoAdmins()}</div>
             </div>
           )}
 

@@ -21,7 +21,8 @@ export interface LoginData {
 }
 
 export interface OtpRequest {
-  email: string;
+  email?: string;
+  newEmail?: string;
 }
 
 export interface ResetPasswordData {
@@ -162,6 +163,62 @@ export const uploadAvatar = async (userId: string, avatarUrl: string) => {
     );
     return response.data.user;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const requestEmailChangeOtp = async (data: { newEmail: string }) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+
+    const response = await api.post("/user/request-email-change-otp", data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("Email OTP response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error requesting email change OTP:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Error details:", error.response?.data);
+    }
+    throw error;
+  }
+};
+
+export const verifyEmailChange = async (data: { otp: string }) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+
+    const response = await api.post("/user/verify-email-change", data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("Raw verify email response:", response);
+
+    // Đảm bảo trả về đúng cấu trúc dữ liệu
+    if (
+      response.data &&
+      !response.data.user &&
+      response.data.data &&
+      response.data.data.user
+    ) {
+      response.data.user = response.data.data.user;
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error verifying email change:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+    }
     throw error;
   }
 };

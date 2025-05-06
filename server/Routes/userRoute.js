@@ -15,6 +15,8 @@ const {
   searchUsers,
   uploadAvatar,
   getUserById,
+  requestEmailChangeOtp,
+  verifyEmailChangeOtp,
 } = require("../controllers/userController");
 const { authMiddleware } = require("../Middlewares/authMiddleware");
 
@@ -38,6 +40,10 @@ router.post(
 );
 router.post("/change-password", authMiddleware, changePassword);
 router.put("/upload-avatar/:userId", authMiddleware, uploadAvatar);
+
+// Thêm API cho thay đổi email
+router.post("/request-email-change-otp", authMiddleware, requestEmailChangeOtp);
+router.post("/verify-email-change", authMiddleware, verifyEmailChangeOtp);
 
 // Route lấy thông tin người dùng theo ID đặt CUỐI CÙNG vì nó bắt tất cả các request với pattern "/:userId"
 router.get("/:userId", authMiddleware, getUserById);

@@ -37,6 +37,10 @@ const sendOtpEmail = async (email, otp, type = "verification") => {
     subject = "iTalk+ Password Reset Request";
     heading = "Password Reset Request";
     description = "Here is your OTP to reset your password:";
+  } else if (type === "email_change") {
+    subject = "iTalk+ Email Change Request";
+    heading = "Email Change Verification";
+    description = "Here is your OTP to verify your new email address:";
   }
 
   const mailOptions = {
@@ -462,7 +466,7 @@ const updateUser = async (req, res) => {
     if (gender) updates.gender = gender;
     if (birthDate) updates.birthDate = birthDate;
     if (address) updates.address = address;
-    if (avt) updates.avt = avt;  // Thêm xử lý cập nhật avatar
+    if (avt) updates.avt = avt; // Thêm xử lý cập nhật avatar
 
     console.log("Updating user with data:", updates);
 
@@ -624,6 +628,109 @@ const requestPasswordChangeOtp = async (req, res) => {
   }
 };
 
+const requestEmailChangeOtp = async (req, res) => {
+  const { newEmail } = req.body;
+  const userId = req.user._id; // From the authentication middleware
+
+  try {
+    // Validate email format
+    if (!validator.isEmail(newEmail)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    // Check if email is already used by another account
+    const existingUser = await userModel.findOne({
+      email: newEmail,
+      _id: { $ne: userId },
+    });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "Email is already used by another account" });
+    }
+
+    // Generate OTP
+    const otp = generateOtp();
+    const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiry
+
+    // Save OTP and new email to Auth model
+    await AuthModel.findOneAndUpdate(
+      { userId },
+      {
+        otp,
+        otpExpiresAt,
+        email: newEmail, // Store the new email temporarily
+      },
+      { upsert: true, new: true }
+    );
+
+    // Send OTP to the NEW email address
+    await sendOtpEmail(newEmail, otp, "email_change");
+
+    res.status(200).json({ message: "OTP sent to your new email address" });
+  } catch (error) {
+    console.error("Error requesting email change OTP:", error);
+    res.status(500).json({
+      message: "Error requesting email change OTP",
+      error: error.message,
+    });
+  }
+};
+
+const verifyEmailChangeOtp = async (req, res) => {
+  const { otp } = req.body;
+  const userId = req.user._id;
+
+  try {
+    // Find auth record with OTP and user ID
+    const authRecord = await AuthModel.findOne({ userId });
+
+    // Verify the OTP exists and is valid
+    if (
+      !authRecord ||
+      !authRecord.otp ||
+      authRecord.otp !== otp ||
+      !authRecord.email
+    ) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // Check if OTP is expired
+    if (authRecord.otpExpiresAt < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    // OTP is valid - update user's email
+    const newEmail = authRecord.email;
+    const user = await userModel.findByIdAndUpdate(
+      userId,
+      { email: newEmail },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Clear OTP and temporary email after successful verification
+    await AuthModel.findOneAndUpdate(
+      { userId },
+      { $unset: { otp: "", otpExpiresAt: "", email: "" } }
+    );
+
+    res.status(200).json({
+      message: "Email updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Error verifying email change OTP:", error);
+    res.status(500).json({
+      message: "Error verifying email change OTP",
+      error: error.message,
+    });
+  }
+};
+
 const searchUsers = async (req, res) => {
   const { query } = req.query;
 
@@ -649,7 +756,7 @@ const searchUsers = async (req, res) => {
   }
 };
 
-// Thêm hàm xử lý upload avatar
+// xử lý upload avatar
 const uploadAvatar = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -698,7 +805,7 @@ const uploadAvatar = async (req, res) => {
   }
 };
 
-// Thêm hàm mới để lấy thông tin người dùng theo ID
+// get thông tin người dùng theo ID
 const getUserById = async (req, res) => {
   const userId = req.params.userId;
 
@@ -736,6 +843,51 @@ const getUserById = async (req, res) => {
   }
 };
 
+// Thêm endpoint mới để test cấu hình email
+const testEmailConfig = async (req, res) => {
+  try {
+    // Kiểm tra kết nối đến server email
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Kiểm tra kết nối
+    await transporter.verify();
+
+    // Log các cài đặt email (chỉ trong môi trường phát triển)
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Email configuration:", {
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        user: process.env.EMAIL_USER
+          ? `${process.env.EMAIL_USER.substring(0, 3)}...`
+          : "not set",
+        from: process.env.EMAIL_FROM_ADDRESS
+          ? `${process.env.EMAIL_FROM_ADDRESS.substring(0, 3)}...`
+          : "not set",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Email server connection successful",
+    });
+  } catch (error) {
+    console.error("Email server connection failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Email server connection failed",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -752,4 +904,7 @@ module.exports = {
   searchUsers,
   uploadAvatar,
   getUserById,
+  requestEmailChangeOtp,
+  verifyEmailChangeOtp,
+  testEmailConfig,
 };

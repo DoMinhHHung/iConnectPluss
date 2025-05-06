@@ -28,10 +28,10 @@ mongoose
 // Middleware
 app.use(cors());
 // Tăng giới hạn kích thước request body cho uploads
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -84,7 +84,9 @@ io.on("connection", (socket) => {
   // Chỉ log thông tin socket.id nếu cần thiết cho debug
   connectCounter++;
   if (connectCounter % 10 === 0) {
-    console.log(`[Connection Stats] Total connections: ${connectCounter}, Active users: ${onlineUsers.size}`);
+    console.log(
+      `[Connection Stats] Total connections: ${connectCounter}, Active users: ${onlineUsers.size}`
+    );
   }
 
   let currentUserId = null;
@@ -694,7 +696,7 @@ io.on("connection", (socket) => {
     // Chỉ log disconnect khi người dùng đã xác thực
     if (authenticated) {
       console.log(`User ${currentUserId} disconnected`);
-      
+
       // Xóa thông tin socket và cập nhật trạng thái người dùng
       userSockets.delete(currentUserId);
       onlineUsers.delete(currentUserId);
