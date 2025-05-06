@@ -209,7 +209,6 @@ const AccountInfoTab: React.FC<AccountInfoTabProps> = ({ user }) => {
       } else if (response.data && response.data.user) {
         dispatch(updateUserSuccess(response.data.user));
       } else {
-        // Nếu user không có trong response, cập nhật bằng thông tin hiện tại và email mới
         const updatedUser = {
           ...user,
           email: formData.email,
@@ -219,7 +218,6 @@ const AccountInfoTab: React.FC<AccountInfoTabProps> = ({ user }) => {
 
       setSuccess("Cập nhật email thành công");
 
-      // Cập nhật lại formData và originalData với email mới
       setOriginalData({
         ...originalData,
         email: formData.email,
@@ -346,7 +344,6 @@ const AccountInfoTab: React.FC<AccountInfoTabProps> = ({ user }) => {
               )}
             </div>
 
-            {/* Hiển thị phần nhập OTP khi cần */}
             {otpSectionVisible && (
               <div className="mb-3 p-3 border rounded bg-light">
                 <label htmlFor="email-otp" className="form-label fw-bold">
@@ -393,17 +390,6 @@ const AccountInfoTab: React.FC<AccountInfoTabProps> = ({ user }) => {
             >
               {loading ? "Đang xử lý..." : "Cập nhật email"}
             </button>
-
-            {/* Debug button - chỉ hiển thị khi development */}
-            {process.env.NODE_ENV === "development" && (
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm mt-2 ms-2"
-                onClick={testEmailConnection}
-              >
-                Test Email Connection
-              </button>
-            )}
           </form>
         </div>
       </div>

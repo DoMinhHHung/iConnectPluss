@@ -46,9 +46,9 @@ const Navbar: React.FC = () => {
           reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
           timeout: 20000,
-          transports: ["websocket", "polling"]
+          transports: ["websocket", "polling"],
         });
-        
+
         setSocket(newSocket);
 
         // Lắng nghe sự kiện thông báo
@@ -66,11 +66,11 @@ const Navbar: React.FC = () => {
         newSocket.on("connect", () => {
           console.log("Socket connected", newSocket.id);
         });
-        
+
         newSocket.on("disconnect", () => {
           console.log("Socket disconnected");
         });
-        
+
         newSocket.on("error", (error) => {
           console.error("Socket error:", error);
         });

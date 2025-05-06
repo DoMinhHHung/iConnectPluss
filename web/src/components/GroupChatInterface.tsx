@@ -1211,9 +1211,7 @@ const GroupChatInterface: React.FC = () => {
         <div className="group-info">
           <div className="group-avatar">
             {
-         
- 
-                            <div className="avatar-placeholder">
+              <div className="avatar-placeholder">
                 {group.name.charAt(0).toUpperCase()}
               </div>
             }
@@ -1886,30 +1884,34 @@ const GroupChatInterface: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleFileTypeSelect("image")}
-                  className="attach-option"
+                  className="attach-option image"
                 >
-                  <FiImage /> Image
+                  <FiImage />
+                  <span>Image</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleFileTypeSelect("video")}
-                  className="attach-option"
+                  className="attach-option video"
                 >
-                  <FiVideo /> Video
+                  <FiVideo />
+                  <span>Video</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleFileTypeSelect("audio")}
-                  className="attach-option"
+                  className="attach-option audio"
                 >
-                  <FiMusic /> Audio
+                  <FiMusic />
+                  <span>Audio</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleFileTypeSelect("file")}
-                  className="attach-option"
+                  className="attach-option document"
                 >
-                  <FiFileText /> Document
+                  <FiFileText />
+                  <span>Document</span>
                 </button>
               </div>
             )}

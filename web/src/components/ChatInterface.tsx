@@ -255,7 +255,9 @@ const ChatInterface: React.FC = () => {
         // Thay thế tin nhắn tạm thời bằng tin nhắn thật từ server thay vì thêm tin nhắn mới
         setMessages((prev) =>
           prev.map((msg) =>
-            msg._id === data._tempId ? { ...newMessage, _tempId: data._tempId } : msg
+            msg._id === data._tempId
+              ? { ...newMessage, _tempId: data._tempId }
+              : msg
           )
         );
         // Thêm return để không thêm tin nhắn mới nếu đã có tin nhắn tạm

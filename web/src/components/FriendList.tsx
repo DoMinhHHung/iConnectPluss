@@ -85,7 +85,7 @@ const FriendList: React.FC = () => {
               _id: friend._id,
               name: friend.name || "Người dùng",
               isOnline: false, // Mặc định là offline, có thể cập nhật qua socket
-              ...(friend.avt && { avt: friend.avt }) // Chỉ thêm avt nếu nó tồn tại
+              ...(friend.avt && { avt: friend.avt }), // Chỉ thêm avt nếu nó tồn tại
             });
           } catch (err) {
             console.error("Error extracting friend data:", err);
